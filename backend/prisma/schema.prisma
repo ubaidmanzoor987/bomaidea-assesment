@@ -10,22 +10,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Project {
+  id     Int             @id @default(autoincrement())
+  name   String
+  state  ProjectEnumType
+  date   DateTime        @default(now())
+  Access Access[]
 
-  id    String @id @default(uuid())
-  name  String @db.VarChar(255)
-  email String
-
-  password String
-  role     RoleEnumType? @default(user)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map(name: "users")
+  @@map(name: "project")
 }
 
-enum RoleEnumType {
-  user
-  admin
+model Access {
+  id         Int             @id @default(autoincrement())
+  project    Project         @relation(fields: [project_id], references: [id])
+  project_id Int
+  user_id    Int
+  permit     PermitEnumType
+
+  @@unique([project_id, user_id, permit])
+  @@map(name: "access")
+}
+
+enum ProjectEnumType {
+  Propose
+  Open
+  Closed
+}
+
+enum PermitEnumType {
+  Read
+  Create
+  Update
+  Delete
 }
