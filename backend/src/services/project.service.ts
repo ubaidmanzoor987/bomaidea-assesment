@@ -141,9 +141,9 @@ class ProjectService {
     name?: any;
     projectId?: any;
   }): Promise<Task> {
-    const { name, projectId } = taskData;
+    const { name, projectid: projectId } = taskData;
     if (!projectId) {
-      throw new Error("projectid is required");
+      throw new Error("projectId is required");
     }
 
     if (!name) {

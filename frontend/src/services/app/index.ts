@@ -28,3 +28,20 @@ export const getProjectById = async (userId: string,projectId: string) => {
     throw new Error(getErrorMessage(err));
   }
 };
+
+export const createTaskByProjectId = async (name: string, projectId: string, userId: string) => {
+  try {
+    const resp = await postRequest(`${PROJECTS}/task` , {
+      name,
+      projectid: projectId
+    }, 
+    {
+      headers: {
+        userId
+      }
+    });
+    return { response: resp.data };
+  } catch (err: any) {
+    throw new Error(getErrorMessage(err));
+  }
+};

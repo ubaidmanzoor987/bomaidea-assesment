@@ -7,11 +7,15 @@ export default function permit(permittedRoles: string[]) {
     // return a middleware
     return async (req: Request, res: Response, next: NextFunction) => {
       const { userid: userId } = req.headers;
-      const projectId = Number(req.params.id);
+      let projectId = Number(req.params.id);
       if (!userId) {
         res.status(403).json({message: "userId is required"});
         return;
       }
+      if (!projectId) {
+        projectId = req.body.projectid;
+      }
+
       if (!projectId) {
         res.status(403).json({message: "projectId is required"});
         return;
