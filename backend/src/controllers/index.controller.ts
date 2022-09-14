@@ -6,8 +6,8 @@ class IndexController {
   public index = (req: Request, res: Response, next: NextFunction) => {
     try {
       res.sendStatus(200);
-    } catch (error) {
-      next(error);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   };
 }

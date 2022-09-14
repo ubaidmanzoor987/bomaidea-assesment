@@ -1,5 +1,4 @@
-import router from 'next/router';
-
+import HomePageModule from '@/modules/home';
 import { HomeStyled } from './index.styles';
 
 /**
@@ -10,7 +9,7 @@ const Home = () => {
 
   return (
     <HomeStyled data-testid="home-container">
-      hello
+      <HomePageModule />
     </HomeStyled>
   );
 };

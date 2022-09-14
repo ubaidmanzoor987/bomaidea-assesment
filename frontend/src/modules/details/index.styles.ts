@@ -3,6 +3,8 @@ import { Box } from '@mui/material';
 
 export const HomeStyled = styled(Box)`
   display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 80%;
+  flex-direction: column;
+  margin-top: 100px;
+  margin-bottom: 100px;
 `;

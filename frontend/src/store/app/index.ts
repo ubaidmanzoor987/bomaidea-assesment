@@ -1,6 +1,9 @@
 export {
   clearError,
-  setData
+  allProjectsThunk,
+  setIsBack,
+  setUserId,
+  setProjectId
 } from './appSlice';
-export { getAuthDataSelector } from './appSelector';
+export { getAppSelector } from './appSelector';
 export { default } from './appSlice';

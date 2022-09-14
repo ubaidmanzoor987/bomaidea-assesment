@@ -3,4 +3,6 @@ export const REQUEST_HEADERS = {
   Accept: 'application/json',
 };
 
-export const API_URL = 'https://localhost:8000';
+export const API_URL = 'http://localhost:8000/api';
+export const PROJECTS = '/project';
+export const PERMISSIONS = '/permission';

@@ -1,4 +1,4 @@
-import { Project } from "@prisma/client";
+import { Project, Task } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import ProjectService from "../services/project.service";
 
@@ -14,17 +14,15 @@ class ProjectController {
       const { userid: userId } = req.headers;
       const findAllProjects = await this.projectService.findAllProjects(
         req.body,
-        Number(userId),
+        Number(userId)
       );
 
-      res
-        .status(200)
-        .json({
-          data: findAllProjects,
-          message: "Successfully retrieved projects",
-        });
-    } catch (error) {
-      next(error);
+      res.status(200).json({
+        data: findAllProjects,
+        message: "Successfully retrieved projects",
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   };
 
@@ -34,45 +32,69 @@ class ProjectController {
     next: NextFunction
   ) => {
     try {
+      const { userid: userId } = req.headers;
       const projectId = Number(req.params.id);
       if (!projectId) {
         throw new Error("projectid is required");
       }
-      const project = await this.projectService.findProjectById(projectId);
+      const project = await this.projectService.findProjectById(
+        projectId,
+        userId
+      );
 
       res
         .status(200)
         .json({ data: project, message: "successfully retrieved project" });
-    } catch (error) {
-      next(error);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   };
 
-  public createProject = async (req: Request, res: Response, next: NextFunction) => {
+  public createProject = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const projectData = req.body;
-      const createProjectData: Project = await this.projectService.createProject(projectData);
+      const createProjectData: Project =
+        await this.projectService.createProject(projectData);
 
-      res.status(200).json({ data: createProjectData, message: `Project ${createProjectData.name} successfully created` });
-    } catch (error) {
-      next(error);
+      res
+        .status(200)
+        .json({
+          data: createProjectData,
+          message: `Project ${createProjectData.name} successfully created`,
+        });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   };
 
-    public updateProject = async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const projectId = Number(req.params.id);
-        if (!projectId) {
-          throw new Error("projectid is required");
-        }
-        const projectData = req.body;
-        const updateProjectData: Project = await this.projectService.updateProject(projectId, projectData);
-
-        res.status(200).json({ data: updateProjectData, message: `Project ${updateProjectData.name} successfully updated` });
-      } catch (error) {
-        next(error);
+  public updateProject = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const projectId = Number(req.params.id);
+      if (!projectId) {
+        throw new Error("projectid is required");
       }
-    };
+      const projectData = req.body;
+      const updateProjectData: Project =
+        await this.projectService.updateProject(projectId, projectData);
+
+      res
+        .status(200)
+        .json({
+          data: updateProjectData,
+          message: `Project ${updateProjectData.name} successfully updated`,
+        });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  };
 
   public deleteProject = async (
     req: Request,
@@ -84,11 +106,37 @@ class ProjectController {
       if (!projectId) {
         throw new Error("projectid is required");
       }
-      const deleteProjectData: Project = await this.projectService.deleteProject(projectId);
+      const deleteProjectData: Project =
+        await this.projectService.deleteProject(projectId);
 
-      res.status(200).json({ data: deleteProjectData, message: `Project ${deleteProjectData.name} successfully deleted` });
-    } catch (error) {
-      next(error);
+      res
+        .status(200)
+        .json({
+          data: deleteProjectData,
+          message: `Project ${deleteProjectData.name} successfully deleted`,
+        });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  };
+
+  public createTask = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const createTask: Task =
+        await this.projectService.createTask(req.body);
+
+      res
+        .status(200)
+        .json({
+          data: createTask,
+          message: `task ${createTask.name} successfully created`,
+        });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   };
 }
