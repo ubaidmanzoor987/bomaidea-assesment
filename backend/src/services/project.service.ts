@@ -31,7 +31,7 @@ class ProjectService {
     const userProjects = await this.prisma.access.findMany({
       where: {
         permit: "Read",
-        user_id: userId,
+        user_id: Number(userId),
       },
     });
     if (!userProjects.length) {

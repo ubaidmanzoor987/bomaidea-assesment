@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import { useDispatch, useSelector } from "react-redux";
 import Button from "@/components/core/Button";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { getAppSelector, setIsBack } from "@/store/app";
+import { allProjectsThunk, getAppSelector, setIsBack } from "@/store/app";
 import { HomeStyled } from "./index.styles";
 import {
   createTaskByProjectId,
@@ -31,6 +31,7 @@ const style = {
 };
 
 const DetailsModule = () => {
+  const dispatch = useDispatch();
   const { userId, projectId } = useSelector(getAppSelector);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -177,7 +178,8 @@ const DetailsModule = () => {
       const resp = await deleteProjectById(obj.data.id, userId);
       if (resp.response && resp.response.data) {
         handleClose();
-        await fetchProject();
+        dispatch(allProjectsThunk({userId}));
+        router.push("/");
       }
     } catch (err: any) {}
   };
