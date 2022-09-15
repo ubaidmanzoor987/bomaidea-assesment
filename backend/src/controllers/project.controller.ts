@@ -77,13 +77,9 @@ class ProjectController {
     next: NextFunction
   ) => {
     try {
-      const projectId = Number(req.params.id);
-      if (!projectId) {
-        throw new Error("projectid is required");
-      }
       const projectData = req.body;
       const updateProjectData: Project =
-        await this.projectService.updateProject(projectId, projectData);
+        await this.projectService.updateProject(projectData);
 
       res
         .status(200)

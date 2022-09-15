@@ -10,7 +10,7 @@ import { HomeStyled } from "./index.styles";
 const HomePageModule = () => {
   const dispatch = useDispatch();
 
-  const { error, pending, projects, userId, isBack } =
+  const { error, pending, projects, userId } =
     useSelector(getAppSelector);
 
   const [obj, setObj] = useState({
@@ -54,6 +54,7 @@ const HomePageModule = () => {
             error={obj.error.length > 0}
             onChange={onChange}
             type="number"
+            value={obj.userId}
           />
           <div>
             {obj.error.length > 0 && (

@@ -7,7 +7,12 @@ import Button from "@/components/core/Button";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { getAppSelector, setIsBack } from "@/store/app";
 import { HomeStyled } from "./index.styles";
-import { createTaskByProjectId, getProjectById } from "@/services/app";
+import {
+  createTaskByProjectId,
+  deleteProjectById,
+  getProjectById,
+  updateProjectById,
+} from "@/services/app";
 import { IProject } from "@/store/app/types";
 import { useRouter } from "next/router";
 import Label from "@/components/core/Label";
@@ -26,13 +31,26 @@ const style = {
 };
 
 const DetailsModule = () => {
-  const dispatch = useDispatch();
+  const { userId, projectId } = useSelector(getAppSelector);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [errorTask, setErrorTask] = useState("");
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [permission, setPermission] = useState<string>("");
+  const [updateData, setUpdateData] = useState<IProject>({
+    name: "",
+    state: "",
+    date: "",
+    id: "",
+  });
+
+  const [updateError, setUpdateError] = useState<any>({
+    name: "",
+    state: "",
+    date: "",
+    id: "",
+  });
 
   const router = useRouter();
   const [obj, setObj] = useState<{
@@ -46,7 +64,6 @@ const DetailsModule = () => {
       permissions: string[];
     },
   });
-  const { userId, projectId } = useSelector(getAppSelector);
 
   const fetchProject = async () => {
     try {
@@ -64,6 +81,11 @@ const DetailsModule = () => {
   const onClick = (per: string) => {
     handleOpen();
     setPermission(per);
+    if (per === "Update") {
+      setUpdateData({
+        ...obj.data,
+      });
+    }
   };
 
   const onClickBack = () => {
@@ -71,7 +93,39 @@ const DetailsModule = () => {
   };
 
   const onChange = (e: any) => {
-    setName(e.target.value);
+    const name = e.target.name;
+    const value = e.target.value;
+    switch (name) {
+      case "taskName":
+        setName(value);
+        break;
+      case "name":
+        setUpdateData({
+          ...updateData,
+          name: value,
+        });
+        break;
+      case "state":
+        setUpdateData({
+          ...updateData,
+          state: value,
+        });
+        break;
+      case "date":
+        setUpdateData({
+          ...updateData,
+          date: value,
+        });
+        break;
+      default:
+        break;
+    }
+    if (updateError[name] && updateError[name].length > 0) {
+      setUpdateError({
+        ...updateError,
+        [name]: "",
+      });
+    }
     if (errorTask.length > 0) {
       setErrorTask("");
     }
@@ -85,6 +139,45 @@ const DetailsModule = () => {
       const resp = await createTaskByProjectId(name, projectId, userId);
       if (resp.response && resp.response.data) {
         handleClose();
+      }
+    } catch (err: any) {}
+  };
+
+  const updateProject = async () => {
+    try {
+      if (updateData.name.length === 0) {
+        setUpdateError({
+          ...updateError,
+          name: "Name Is Required",
+        });
+        return;
+      } else if (updateData.state.length === 0) {
+        setUpdateError({
+          ...updateError,
+          name: "State Is Required",
+        });
+        return;
+      } else if (updateData.date.length === 0) {
+        setUpdateError({
+          ...updateError,
+          name: "Date Is Required",
+        });
+        return;
+      }
+      const resp = await updateProjectById(updateData, projectId, userId);
+      if (resp.response && resp.response.data) {
+        handleClose();
+        await fetchProject();
+      }
+    } catch (err: any) {}
+  };
+
+  const deleteProject = async () => {
+    try {
+      const resp = await deleteProjectById(obj.data.id, userId);
+      if (resp.response && resp.response.data) {
+        handleClose();
+        await fetchProject();
       }
     } catch (err: any) {}
   };
@@ -149,6 +242,66 @@ const DetailsModule = () => {
 
             <div style={{ marginTop: 10 }}>
               <Button onClick={createTask}>Create Task</Button>
+            </div>
+          </Box>
+        ) : permission === "Update" ? (
+          <Box sx={style}>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              Update Project
+            </Typography>
+            <div style={{ marginTop: 10 }}>
+              <Label>Name:</Label>
+              <FieldInput
+                name="name"
+                style={{ marginTop: 5 }}
+                onChange={onChange}
+                value={updateData.name}
+              />
+            </div>
+            <div>
+              {updateError.name.length > 0 && (
+                <p style={{ color: "red" }}>{updateError.name}</p>
+              )}
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <Label>State:</Label>
+              <FieldInput
+                name="state"
+                style={{ marginTop: 5 }}
+                onChange={onChange}
+                value={updateData.state}
+              />
+            </div>
+            <div>
+              {updateError.state.length > 0 && (
+                <p style={{ color: "red" }}>{updateError.state}</p>
+              )}
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <Label>Date:</Label>
+              <FieldInput
+                name="date"
+                style={{ marginTop: 5 }}
+                onChange={onChange}
+                value={updateData.date}
+              />
+            </div>
+            <div>
+              {updateError.date.length > 0 && (
+                <p style={{ color: "red" }}>{updateError.date}</p>
+              )}
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <Button onClick={updateProject}>Update</Button>
+            </div>
+          </Box>
+        ) : permission === "Delete" ? (
+          <Box sx={style}>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              Delete Project
+            </Typography>
+            <div style={{ display: "flex" }}>
+              <Button onClick={deleteProject}>Delete</Button>
             </div>
           </Box>
         ) : (

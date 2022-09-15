@@ -79,7 +79,11 @@ class ProjectService {
   }
 
   public async deleteProject(projectId: number): Promise<Project> {
-    const findProject = await this.findProjectById(projectId);
+    const findProject = await this.prisma.project.findFirst({
+      where: {
+        id: projectId,
+      },
+    });
     if (!findProject) throw new Error("invalid projectId");
 
     await this.prisma.project.delete({
@@ -92,17 +96,21 @@ class ProjectService {
   }
 
   public async updateProject(
-    projectId: number | any,
     projectData: {
       name?: any;
       state?: any;
       date?: any;
+      projectid: number | any,
     }
   ): Promise<Project> {
-    const { name, state, date } = projectData;
+    const { name, state, date, projectid: projectId } = projectData;
 
-    const findProject = await this.findProjectById(projectId);
-    if (!findProject) throw new Error("invalid projectId");
+    const projectFind = await this.prisma.project.findFirst({
+      where: {
+        id: Number(projectId),
+      },
+    });
+    if (!projectFind) throw new Error("invalid projectId");
 
     const project = await this.prisma.project.update({
       data: {
@@ -111,7 +119,7 @@ class ProjectService {
         ...(date && { date }),
       },
       where: {
-        id: projectId,
+        id: Number(projectId),
       },
     });
 
@@ -139,7 +147,7 @@ class ProjectService {
 
   public async createTask(taskData: {
     name?: any;
-    projectId?: any;
+    projectid?: any;
   }): Promise<Task> {
     const { name, projectid: projectId } = taskData;
     if (!projectId) {
