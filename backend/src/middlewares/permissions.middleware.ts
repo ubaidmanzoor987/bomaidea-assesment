@@ -21,8 +21,8 @@ export default function permit(permittedRoles: string[]) {
       return;
     }
     const permissions = await permissionService.getUserPermissions(
-      userId,
-      projectId
+      Number(userId),
+      Number(projectId)
     );
     if (permissions.length === 0) {
       res.status(403).json({ message: "not enough permissions" });

@@ -3,10 +3,11 @@ import { ProjectEnumType } from "../interfaces/project.interface";
 import PermissionService from "./permission.service";
 
 type IProjectRequest = {
-  filterBy?: string;
-  filterValue: ProjectEnumType;
-  orderBy?: string;
-  orderType?: "desc" | "asc";
+  filterby?: string;
+  filtervalue: ProjectEnumType;
+  sortby?: string;
+  sortorder?: "desc" | "asc";
+  userid: any;
 };
 
 class ProjectService {
@@ -17,10 +18,13 @@ class ProjectService {
     this.permission = new PermissionService();
   }
 
-  async findAllProjects(
-    { filterBy, orderBy, filterValue, orderType }: IProjectRequest,
-    userId: any
-  ): Promise<Project[]> {
+  async findAllProjects({
+    filterBy,
+    sortby,
+    filterValue,
+    sortorder,
+    userid: userId,
+  }: IProjectRequest | any): Promise<Project[]> {
     if (!userId) {
       throw new Error("userId is required");
     }
@@ -33,6 +37,7 @@ class ProjectService {
     if (!userProjects.length) {
       throw new Error("user has no projects or invalid user id");
     }
+    console.log({sortby})
     const projectIds = userProjects.map((pro) => pro.project_id);
     const projects = await this.prisma.project.findMany({
       where: {
@@ -41,9 +46,9 @@ class ProjectService {
           in: projectIds,
         },
       },
-      orderBy: orderBy
+      orderBy: sortby
         ? {
-            [orderBy]: orderType,
+            [sortby]: sortorder,
           }
         : {
             id: "asc",
@@ -95,14 +100,12 @@ class ProjectService {
     return findProject;
   }
 
-  public async updateProject(
-    projectData: {
-      name?: any;
-      state?: any;
-      date?: any;
-      projectid: number | any,
-    }
-  ): Promise<Project> {
+  public async updateProject(projectData: {
+    name?: any;
+    state?: any;
+    date?: any;
+    projectid: number | any;
+  }): Promise<Project> {
     const { name, state, date, projectid: projectId } = projectData;
 
     const projectFind = await this.prisma.project.findFirst({

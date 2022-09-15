@@ -7,7 +7,6 @@ class PermissionService {
   }
 
   async getUserPermissions(userId: any, projectId?: any): Promise<string[]> {
-    console.log("userid asdasdas", userId, projectId)
     const accessData = await this.prisma.access.findMany({
       where: {
         user_id: Number(userId),

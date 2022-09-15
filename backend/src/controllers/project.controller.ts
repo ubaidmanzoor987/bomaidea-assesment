@@ -11,10 +11,8 @@ class ProjectController {
     next: NextFunction
   ) => {
     try {
-      const { userid: userId } = req.headers;
       const findAllProjects = await this.projectService.findAllProjects(
-        req.body,
-        Number(userId)
+        req.headers
       );
 
       res.status(200).json({
@@ -60,12 +58,10 @@ class ProjectController {
       const createProjectData: Project =
         await this.projectService.createProject(projectData);
 
-      res
-        .status(200)
-        .json({
-          data: createProjectData,
-          message: `Project ${createProjectData.name} successfully created`,
-        });
+      res.status(200).json({
+        data: createProjectData,
+        message: `Project ${createProjectData.name} successfully created`,
+      });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
@@ -81,12 +77,10 @@ class ProjectController {
       const updateProjectData: Project =
         await this.projectService.updateProject(projectData);
 
-      res
-        .status(200)
-        .json({
-          data: updateProjectData,
-          message: `Project ${updateProjectData.name} successfully updated`,
-        });
+      res.status(200).json({
+        data: updateProjectData,
+        message: `Project ${updateProjectData.name} successfully updated`,
+      });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
@@ -105,12 +99,10 @@ class ProjectController {
       const deleteProjectData: Project =
         await this.projectService.deleteProject(projectId);
 
-      res
-        .status(200)
-        .json({
-          data: deleteProjectData,
-          message: `Project ${deleteProjectData.name} successfully deleted`,
-        });
+      res.status(200).json({
+        data: deleteProjectData,
+        message: `Project ${deleteProjectData.name} successfully deleted`,
+      });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
@@ -122,15 +114,12 @@ class ProjectController {
     next: NextFunction
   ) => {
     try {
-      const createTask: Task =
-        await this.projectService.createTask(req.body);
+      const createTask: Task = await this.projectService.createTask(req.body);
 
-      res
-        .status(200)
-        .json({
-          data: createTask,
-          message: `task ${createTask.name} successfully created`,
-        });
+      res.status(200).json({
+        data: createTask,
+        message: `task ${createTask.name} successfully created`,
+      });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
