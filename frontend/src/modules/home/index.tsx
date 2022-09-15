@@ -10,7 +10,7 @@ import { HomeStyled } from "./index.styles";
 const HomePageModule = () => {
   const dispatch = useDispatch();
 
-  const { error, pending, projects, userId } =
+  const { error, pending, userId } =
     useSelector(getAppSelector);
 
   const [obj, setObj] = useState({
@@ -31,6 +31,8 @@ const HomePageModule = () => {
       setObj({ ...obj, error: "User id is required" });
       return;
     }
+    setObj({ ...obj, error: "" });
+
     dispatch(setUserId(obj.userId));
     dispatch(allProjectsThunk({userId: obj.userId}));
   };
@@ -70,7 +72,7 @@ const HomePageModule = () => {
         <h3>Projects</h3>
       </div>
       <div>
-        <DataTable projects={projects} isLoading={pending} userId={obj.userId} />
+        <DataTable userId={obj.userId} />
       </div>
     </HomeStyled>
   );

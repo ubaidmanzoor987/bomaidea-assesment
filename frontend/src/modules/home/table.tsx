@@ -11,20 +11,18 @@ import {
 } from "@mui/x-data-grid";
 import { IProject } from "@/store/app/types";
 import Button from "@/components/core/Button";
-import { useDispatch } from "react-redux";
-import { allProjectsThunk, setProjectId } from "@/store/app";
+import { useDispatch, useSelector } from "react-redux";
+import { allProjectsThunk, getAppSelector, setProjectId } from "@/store/app";
 
 interface IProps {
-  projects: IProject[];
-  isLoading: boolean;
   userId: any;
 }
 
-export default function TableData({ projects, isLoading, userId }: IProps) {
+export default function TableData({ userId }: IProps) {
   const dispatch = useDispatch();
   const router = useRouter();
-  const [selectionModel, setSelectionModel] = React.useState<GridRowId[]>([]);
   const [queryOptions, setQueryOptions] = React.useState({});
+  const { projects, pending, projectId } = useSelector(getAppSelector);
 
   const handleSortModelChange = React.useCallback(
     (sortModel: GridSortModel) => {
@@ -43,7 +41,6 @@ export default function TableData({ projects, isLoading, userId }: IProps) {
   );
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 100 },
     {
       field: "name",
       headerName: "Name",
@@ -59,38 +56,46 @@ export default function TableData({ projects, isLoading, userId }: IProps) {
     {
       field: "date",
       headerName: "Date",
-      width: 450,
+      width: 300,
       editable: false,
     },
+    {
+      field: "id",
+      headerName: "Details",
+      sortable: false,
+      width: 450,
+      renderCell: (params) => {
+        const onClick = (e: any) => {
+          e.stopPropagation(); // don't select this row after clicking
+
+          const api: GridApi = params.api;
+          const thisRow: Record<string, GridCellValue> | any = {};
+
+          api
+            .getAllColumns()
+            .filter((c) => c.field !== "__check__" && !!c)
+            .forEach(
+              (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
+            );
+          dispatch(setProjectId(thisRow.id));
+          router.push("/details");
+        };
+
+        return <Button onClick={onClick}>Fetch Details</Button>;
+      },
+    },
   ];
-  const goToDetails = () => {
-    router.push("/details");
-  };
 
   return (
     <Box sx={{ height: 400, width: "100%" }}>
-      {selectionModel.length > 0 && (
-        <Button onClick={goToDetails}>Fetch Details</Button>
-      )}
       <DataGrid
         rows={projects}
         columns={columns}
-        loading={isLoading}
+        loading={pending}
         hideFooterPagination
-        checkboxSelection
-        selectionModel={selectionModel}
         hideFooterSelectedRowCount
         sortingMode="server"
-        onSelectionModelChange={(selection) => {
-          if (selection.length > 1) {
-            const selectionSet = new Set(selectionModel);
-            const result = selection.filter((s) => !selectionSet.has(s));
-            setSelectionModel(result);
-            dispatch(setProjectId(result[0].toString()));
-          } else {
-            setSelectionModel(selection);
-          }
-        }}
+        checkboxSelection={false}
         onSortModelChange={handleSortModelChange}
       />
     </Box>
