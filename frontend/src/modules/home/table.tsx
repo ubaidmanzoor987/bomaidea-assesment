@@ -1,20 +1,46 @@
 import * as React from "react";
 import { useRouter } from "next/router";
 import Box from "@mui/material/Box";
-import { DataGrid, GridApi, GridCellValue, GridColDef } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridApi,
+  GridCellValue,
+  GridColDef,
+  GridRowId,
+  GridSortModel,
+} from "@mui/x-data-grid";
 import { IProject } from "@/store/app/types";
 import Button from "@/components/core/Button";
 import { useDispatch } from "react-redux";
-import { setProjectId } from "@/store/app";
+import { allProjectsThunk, setProjectId } from "@/store/app";
 
 interface IProps {
   projects: IProject[];
   isLoading: boolean;
+  userId: any;
 }
 
-export default function TableData({ projects, isLoading }: IProps) {
+export default function TableData({ projects, isLoading, userId }: IProps) {
   const dispatch = useDispatch();
   const router = useRouter();
+  const [selectionModel, setSelectionModel] = React.useState<GridRowId[]>([]);
+  const [queryOptions, setQueryOptions] = React.useState({});
+
+  const handleSortModelChange = React.useCallback(
+    (sortModel: GridSortModel) => {
+      setQueryOptions({ sortModel: [...sortModel] });
+      if (sortModel.length > 0) {
+        const sortData = sortModel[0];
+        const dt = {
+          userId,
+          sortBy: sortData.field,
+          sortOrder: sortData.sort,
+        };
+        dispatch(allProjectsThunk(dt));
+      }
+    },
+    []
+  );
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 100 },
@@ -32,37 +58,40 @@ export default function TableData({ projects, isLoading }: IProps) {
     },
     {
       field: "date",
-      headerName: "Details",
-      sortable: false,
+      headerName: "Date",
       width: 450,
-      renderCell: (params) => {
-        const onClick = (e: any) => {
-          e.stopPropagation(); // don't select this row after clicking
-  
-          const api: GridApi = params.api;
-          const thisRow: Record<string, GridCellValue> | any = {};
-  
-          api
-            .getAllColumns()
-            .filter((c) => c.field !== "__check__" && !!c)
-            .forEach(
-              (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
-            );
-          dispatch(setProjectId(thisRow.id));
-          router.push("/details");
-        };
-  
-        return <Button onClick={onClick}>Fetch Details</Button>;
-      },
+      editable: false,
     },
   ];
+  const goToDetails = () => {
+    router.push("/details");
+  };
+
   return (
     <Box sx={{ height: 400, width: "100%" }}>
+      {selectionModel.length > 0 && (
+        <Button onClick={goToDetails}>Fetch Details</Button>
+      )}
       <DataGrid
         rows={projects}
         columns={columns}
         loading={isLoading}
         hideFooterPagination
+        checkboxSelection
+        selectionModel={selectionModel}
+        hideFooterSelectedRowCount
+        sortingMode="server"
+        onSelectionModelChange={(selection) => {
+          if (selection.length > 1) {
+            const selectionSet = new Set(selectionModel);
+            const result = selection.filter((s) => !selectionSet.has(s));
+            setSelectionModel(result);
+            dispatch(setProjectId(result[0].toString()));
+          } else {
+            setSelectionModel(selection);
+          }
+        }}
+        onSortModelChange={handleSortModelChange}
       />
     </Box>
   );

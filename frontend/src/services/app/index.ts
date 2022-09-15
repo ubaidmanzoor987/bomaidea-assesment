@@ -4,11 +4,15 @@ import { getErrorMessage } from "@/utils/helper";
 
 import { postRequest, getRequest, putRequest, deleteRequest } from "../utils";
 
-export const getAllProjects = async (userId: string) => {
+export const getAllProjects = async (data: any) => {
   try {
     const resp = await getRequest(PROJECTS, {
       headers: {
-        userId,
+        userid: data.userId,
+        ...(data.sortBy && {sortby: data.sortBy}),
+        ...(data.sortOrder && {sortorder: data.sortOrder}),
+        ...(data.filterBy && {filterby: data.filterBy}),
+        ...(data.filterValue && {filtervalue: data.filterValue}),
       },
     });
     return { response: resp.data };

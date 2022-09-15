@@ -12,8 +12,8 @@ export const initialState: appState = {
   projectId: ''
 };
 
-export const allProjectsThunk = createAsyncThunk('app/allProjectsThunk', async (userId: string) => {
-  return await getAllProjects(userId);
+export const allProjectsThunk = createAsyncThunk('app/allProjectsThunk', async (data: any) => {
+  return await getAllProjects(data);
 });
 
 const appSlice = createSlice({

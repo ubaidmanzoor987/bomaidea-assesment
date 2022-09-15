@@ -32,7 +32,7 @@ const HomePageModule = () => {
       return;
     }
     dispatch(setUserId(obj.userId));
-    dispatch(allProjectsThunk(obj.userId));
+    dispatch(allProjectsThunk({userId: obj.userId}));
   };
 
   useEffect(() => {
@@ -70,7 +70,7 @@ const HomePageModule = () => {
         <h3>Projects</h3>
       </div>
       <div>
-        <DataTable projects={projects} isLoading={pending} />
+        <DataTable projects={projects} isLoading={pending} userId={obj.userId} />
       </div>
     </HomeStyled>
   );
