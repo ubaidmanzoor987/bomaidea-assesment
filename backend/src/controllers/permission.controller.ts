@@ -21,8 +21,8 @@ class PermissionsController {
           data: permissions,
           message: "Successfully retrieved permissions",
         });
-    } catch (error) {
-      next(error);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   };
 

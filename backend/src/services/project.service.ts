@@ -1,5 +1,6 @@
-import { Project, PrismaClient } from "@prisma/client";
+import { Project, PrismaClient, Task } from "@prisma/client";
 import { ProjectEnumType } from "../interfaces/project.interface";
+import PermissionService from "./permission.service";
 
 type IProjectRequest = {
   filterBy?: string;
@@ -10,23 +11,23 @@ type IProjectRequest = {
 
 class ProjectService {
   public prisma;
+  public permission;
   constructor() {
     this.prisma = new PrismaClient();
+    this.permission = new PermissionService();
   }
 
-  async findAllProjects({
-    filterBy,
-    orderBy,
-    filterValue,
-    orderType,
-  }: IProjectRequest, userId: any): Promise<Project[]> {
+  async findAllProjects(
+    { filterBy, orderBy, filterValue, orderType }: IProjectRequest,
+    userId: any
+  ): Promise<Project[]> {
     if (!userId) {
       throw new Error("userId is required");
     }
     const userProjects = await this.prisma.access.findMany({
       where: {
         permit: "Read",
-        user_id: userId
+        user_id: userId,
       },
     });
     if (!userProjects.length) {
@@ -52,7 +53,18 @@ class ProjectService {
     return projects;
   }
 
-  async findProjectById(projectId: any): Promise<Project> {
+  async findProjectById(
+    projectId: any,
+    userId?: any
+  ): Promise<
+    Project & {
+      permissions: string[];
+    }
+  > {
+    const permissions = await this.permission.getUserPermissions(
+      Number(userId),
+      Number(projectId)
+    );
     const project = await this.prisma.project.findFirst({
       where: {
         id: projectId,
@@ -60,11 +72,18 @@ class ProjectService {
     });
     if (!project) throw new Error("invalid projectId");
 
-    return project;
+    return {
+      ...project,
+      permissions,
+    };
   }
 
   public async deleteProject(projectId: number): Promise<Project> {
-    const findProject = await this.findProjectById(projectId);
+    const findProject = await this.prisma.project.findFirst({
+      where: {
+        id: projectId,
+      },
+    });
     if (!findProject) throw new Error("invalid projectId");
 
     await this.prisma.project.delete({
@@ -77,17 +96,21 @@ class ProjectService {
   }
 
   public async updateProject(
-    projectId: number | any,
     projectData: {
       name?: any;
       state?: any;
       date?: any;
+      projectid: number | any,
     }
   ): Promise<Project> {
-    const { name, state, date } = projectData;
+    const { name, state, date, projectid: projectId } = projectData;
 
-    const findProject = await this.findProjectById(projectId);
-    if (!findProject) throw new Error("invalid projectId");
+    const projectFind = await this.prisma.project.findFirst({
+      where: {
+        id: Number(projectId),
+      },
+    });
+    if (!projectFind) throw new Error("invalid projectId");
 
     const project = await this.prisma.project.update({
       data: {
@@ -96,7 +119,7 @@ class ProjectService {
         ...(date && { date }),
       },
       where: {
-        id: projectId,
+        id: Number(projectId),
       },
     });
 
@@ -120,6 +143,29 @@ class ProjectService {
     });
 
     return project;
+  }
+
+  public async createTask(taskData: {
+    name?: any;
+    projectid?: any;
+  }): Promise<Task> {
+    const { name, projectid: projectId } = taskData;
+    if (!projectId) {
+      throw new Error("projectId is required");
+    }
+
+    if (!name) {
+      throw new Error("name is required");
+    }
+
+    const task = await this.prisma.task.create({
+      data: {
+        name: name,
+        project_id: projectId,
+      },
+    });
+
+    return task;
   }
 }
 

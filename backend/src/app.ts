@@ -4,6 +4,7 @@ import config from "config";
 import validateEnv from "./utils/validateEnv";
 import Routes from './interfaces/route.interface';
 import errorMiddleware from './middlewares/error.middleware';
+import cors from 'cors';
 
 class App {
   public app: express.Application;
@@ -23,6 +24,7 @@ class App {
   private initializeMiddlewares() {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(cors({ origin: true, credentials: true }));
   }
 
   private initializeRoutes(routes: Routes[]) {

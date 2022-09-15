@@ -16,13 +16,23 @@ model Project {
   state  ProjectEnumType
   date   DateTime        @default(now())
   Access Access[]
+  Task   Task[]
 
   @@map(name: "project")
 }
 
+model Task {
+  id         Int     @id @default(autoincrement())
+  name       String
+  project    Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  project_id Int
+
+  @@map(name: "tasks")
+}
+
 model Access {
-  id         Int             @id @default(autoincrement())
-  project    Project         @relation(fields: [project_id], references: [id])
+  id         Int            @id @default(autoincrement())
+  project    Project        @relation(fields: [project_id], references: [id], onDelete: Cascade)
   project_id Int
   user_id    Int
   permit     PermitEnumType

@@ -16,10 +16,11 @@ class ProjectRoute implements Route {
 
   private initializeRoutes() {
     this.router.get(`${this.path}`, this.projectController.getProjects);
+    this.router.post(`${this.path}`, this.projectController.createProject);
     this.router.get(`${this.path}/:id(\\d+)`, permit(["Read"]), this.projectController.getProjectById);
-    this.router.post(`${this.path}`, permit(["Create"]), this.projectController.createProject);
-    this.router.put(`${this.path}/:id(\\d+)`, permit(["Update"]), this.projectController.updateProject);
+    this.router.put(`${this.path}`, permit(["Update"]), this.projectController.updateProject);
     this.router.delete(`${this.path}/:id(\\d+)`, permit(["Delete"]), this.projectController.deleteProject);
+    this.router.post(`${this.path}/task`, permit(["Create"]), this.projectController.createTask);
   }
 }
 
